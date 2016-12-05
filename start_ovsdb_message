@@ -1,2 +1,3 @@
 /usr/sbin/ovsdb-server --remote=punix:/home/ubuntu/ovnnb_db.sock --remote=ptcp:6643:0.0.0.0 --pidfile=/home/ubuntu/ovnnb_db.pid --unixctl=/home/ubuntu/ovnnb_db.ctl /home/ubuntu/message.db -v
 ovsdb-client transact unix:/home/ubuntu/ovnnb_db.sock '["Message",{"op":"insert", "table":"MessageIn", "row":{"data":["map",[["1","2"],["wer","2"]]],"timestamp":12, "object_type": "new","object_uuid":"xx"}, "uuid-name":"anotheritem" }]'
+ovsdb-client transact unix:/home/ubuntu/ovnnb_db.sock '["Message",{"op":"select", "table":"MessageIn", "where":[["object_uuid","==","xx"]]}]'
