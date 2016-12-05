@@ -1,4 +1,6 @@
 sudo modprobe openvswitch
+sleep 2
+sudo modprobe vport_vxlan
 cd /opt/stack/data/ovs
 
 ovsdb-server --detach --monitor -vconsole:off --log-file=/opt/stack/logs/ovsdb-server-nb.log --remote=punix:/usr/local/var/run/openvswitch/ovnnb_db.sock --remote=ptcp:6641:0.0.0.0 --pidfile=/usr/local/var/run/openvswitch/ovnnb_db.pid --unixctl=ovnnb_db.ctl /opt/stack/data/ovs/ovnnb.db
