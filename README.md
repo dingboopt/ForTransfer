@@ -18,3 +18,6 @@ https://github.com/dingboopt/networking-wqq/archive/test.zip
 https://github.com/openstack/networking-odl/archive/stable/mitaka.zip
 
 key=lambda item:item[1].values()[0]['timestamp']
+广播:port_update,port_delete(network), security group rule update, memenber update ,add fdb entry(通知其他节点)，router_update
+
+单播: add fdb entry（本节点某个network首个上线
