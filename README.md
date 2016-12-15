@@ -17,7 +17,6 @@ https://github.com/dingboopt/networking-wqq/archive/test.zip
 
 https://github.com/openstack/networking-odl/archive/stable/mitaka.zip
 
-key=lambda item:item[1].values()[0]['timestamp']
-广播:port_update,port_delete(network), security group rule update, memenber update ,add fdb entry(通知其他节点)，router_update
+ovsdb-client transact unix:/home/ubuntu/ovnnb_db.sock '["Message",{"op":"delete", "table":"MessageIn", "where":[["object_uuid","==","xx"]]}]'
 
-单播: add fdb entry（本节点某个network首个上线
+ovsdb-client -v  transact unix:/home/ubuntu/ovnnb_db.sock '["Message",{"op":"insert", "table":"MessageIn", "row":{"data":["map",[["1","2"],["wer","2"]]],"timestamp":3,"object_type": "new","object_uuid":"xx"}, "uuid-name":"anotheritem" }]'
