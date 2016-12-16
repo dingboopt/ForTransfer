@@ -20,3 +20,4 @@ https://github.com/openstack/networking-odl/archive/stable/mitaka.zip
 ovsdb-client transact unix:/home/ubuntu/ovnnb_db.sock '["Message",{"op":"delete", "table":"MessageIn", "where":[["object_uuid","==","xx"]]}]'
 
 ovsdb-client -v  transact unix:/home/ubuntu/ovnnb_db.sock '["Message",{"op":"insert", "table":"MessageIn", "row":{"data":["map",[["1","2"],["wer","2"]]],"timestamp":3,"object_type": "new","object_uuid":"xx"}, "uuid-name":"anotheritem" }]'
+ovsdb-client transact unix:/home/ubuntu/test.sock '["Message",{"op":"delete", "table":"MessageIn", "where":[["object_uuid","==","xx"]]},{"op":"commit","durable":false}]' 
