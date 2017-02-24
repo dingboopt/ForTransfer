@@ -23,3 +23,5 @@ ovsdb-client -v  transact unix:/home/ubuntu/ovnnb_db.sock '["Message",{"op":"ins
 ovsdb-client transact unix:/home/ubuntu/test.sock '["Message",{"op":"delete", "table":"MessageIn", "where":[["object_uuid","==","xx"]]},{"op":"commit","durable":false}]' 
 
 sudo python setup.py develop
+
+ovsdb-client transact tcp:127.0.0.1:6641 '["Topo",{"op":"mutate", "table":"ProxySequence", "mutations":[["sequence","-=",1]] ,"where":[["sequence","==",1]]},{"op":"commit","durable":true}]'
