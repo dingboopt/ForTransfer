@@ -1,0 +1,232 @@
+#!/usr/bin/env python
+# -*-coding:utf-8-*-
+
+from huawei.common.reconstruct_result import ReconstructResult
+from huawei.common.column import Column
+from __builtin__ import str
+from huawei.common import column
+
+
+class TableReconstructor(object):
+
+    def __init__(self):
+        pass
+
+    def do_reconstruct(self, index, count, sort, data):
+        """鏁版嵁琛ㄦ墦妯殑涓氬姟.
+
+        :param index: 寰呮墦妯殑婧愬垪鐨勭储寮曞?锛?
+            鍒楃储寮曞?浠?涓鸿捣濮嬬储寮曞?锛涘綋鎸囧畾澶氫釜婧愬垪鏃朵互鈥?鈥濆崐瑙掑瓧绗﹀垎闅旓紱蹇呴?鍙傛暟
+        :param count: 寰呮墦妯殑婧愬垪鐨勬灇涓惧?鏁伴噺涓婇檺鍊硷細
+            澶т簬绛変簬0鐨勬暣鍨嬪?锛?琛ㄧず鏃犻檺鍒讹紱蹇呴?鍙傛暟
+        :param sort: 鏂板鍒楅泦鍐呴儴鎺掑簭瑕佹眰锛?
+            (0|1)锛岀己鐪佸?涓?锛岃〃绀烘寜鍒楀悕瀛楁瘝鍗囧簭鎺掑垪杈撳嚭锛?琛ㄧず鎸夌収鏋氫妇鍊肩殑棰戝害鍗囧簭瀹屾垚鎺掑簭
+        :param data: 鏁版嵁婧愬瓧绗︿覆锛屽繀閫夊弬鏁帮紱
+            鍐呭鏍煎紡涓?鍒楀悕,鍒楀悕,鍒楀悕;鍒楃被鍨?鍒楃被鍨?鍒楃被鍨?
+                     鍒楃己鐪佸?,鍒楃己鐪佸?,鍒楃己鐪佸?;鍊?鍊?鍊?鈥?
+        :return: 鍦≧econstructResult绫诲疄渚嬩腑濉叆鎵撴í涔嬪悗鐨勬暟鎹唴瀹广?
+        """
+
+        result = ReconstructResult()
+
+        # TODO
+        allowed_types=set(['string','int', 'long','float','boolean'])
+        if data[-1:] == ';':
+            del data[-1:]
+        data_list = data.split(';')
+        # lack meta line
+        if len(data_list) < 3:
+            result.set_err_no(2)
+            return result
+        name = data_list[0]
+        type = data_list[1]
+        defval = data_list[2]
+        user_data = data_list[3:]
+        #1.校验元数据
+        name_list = name.split(',')
+        colume_num = len(name_list)
+
+        indexs = index.split(',')
+        for i in range(len(indexs)):
+            indexs[i] = int(indexs[i])
+            if indexs[i] <0 or indexs[i] >= colume_num:
+                result.set_err_no(1)
+                return result
+        type_list = type.split(',')
+        #列数不匹配
+        if len(type_list) != colume_num:
+            result.set_err_no(2)
+            return result
+
+        for i in range(len(type_list)):
+            if type_list[i] == '':
+                type_list[i] = 'string'
+            else:
+                type_list[i]=type_list[i].lower()
+            #列类型不匹配
+            if type_list[i] not in allowed_types:
+                result.set_err_no(2)
+                return result
+        defval_list = defval.split(',')
+        if len(defval_list) != colume_num:
+            result.set_err_no(2)
+            return result
+        for i in range(colume_num):
+            if defval_list != '':
+                if type_list[i] == 'string':
+                    if isinstance(defval_list[i], str) is not True:
+                        result.set_err_no(2)
+                        return result
+                if type_list[i] == 'int':
+                    try:
+                        defval_list[i] = int(defval_list[i])
+                    except:
+                        result.set_err_no(2)
+                        return result
+                if type_list[i] == 'long':
+                    try:
+                        defval_list[i] = long(defval_list[i])
+                    except:
+                        result.set_err_no(2)
+                        return result
+                if type_list[i] == 'float':
+                    try:
+                        defval_list[i] = float(defval_list[i])
+                    except:
+                        result.set_err_no(2)
+                        return result
+                if type_list[i] == 'boolean':
+                    try:
+                        defval_list[i] = bool(defval_list[i])
+                    except:
+                        result.set_err_no(2)
+                        return result
+        #忽略最后；
+#         if user_data[-1:] == ['']:
+#             del user_data[-1:]
+
+        illegalLines = 0
+        ignoredLines = 0
+        totalLines = 0
+        user_proper_data = []
+        proper_flag = True
+        for i in range(len(user_data)):
+            proper_flag = True
+            totalLines += 1
+            tuples = user_data[i].split(',')
+            if len(tuples) != colume_num:
+                illegalLines += 1
+                proper_flag = False
+                continue
+            for j in range(len(tuples)):
+                if tuples[j] == '' and defval_list[j] == '':
+                    ignoredLines += 1
+                    proper_flag = False
+                    break
+                if tuples[j] == '':
+                    tuples[j] = defval_list[j]
+                if type_list[j] == 'string':
+                    if isinstance(tuples[j], str) is not True:
+                        illegalLines += 1
+                        proper_flag = False
+                        break
+                if type_list[j] == 'int':
+                    try:
+                        int(tuples[j])
+                    except:
+                        illegalLines += 1
+                        proper_flag = False
+                        break
+                if type_list[j] == 'long':
+                    try:
+                        long(tuples[j])
+                    except:
+                        illegalLines += 1
+                        proper_flag = False
+                        break
+                if type_list[j] == 'float':
+                    try:
+                        float(tuples[j])
+                    except:
+                        illegalLines += 1
+                        proper_flag = False
+                        break
+                if type_list[j] == 'boolean':
+                    try:
+                        bool(tuples[j])
+                    except:
+                        illegalLines += 1
+                        proper_flag = False
+                        break
+            if proper_flag is True:
+                user_proper_data.append(user_data[i])
+
+        result.set_total_lines(totalLines)
+        result.set_ignored_lines(ignoredLines)
+        result.set_illegal_lines(illegalLines)
+
+        for i in range(colume_num):
+            name = name_list[i]
+            values = []
+            for item in user_proper_data:
+                tuples = item.split(',')
+                if tuples[i] == '':
+                    values.append(defval_list[i])
+                else:
+                    values.append(tuples[i])
+            column_obj = Column(name, values)
+            result.add_column(column_obj)
+
+
+        for real_index in indexs:
+            add_columnes_dict={}
+            for i in range(len(user_proper_data)):
+                tuples = user_proper_data[i].split(',')
+                if tuples[real_index] == '':
+                    key = 'Flag_'+name_list[real_index]+'_'+str(defval_list[real_index])
+                else:
+                    key = 'Flag_'+name_list[real_index]+'_'+str(tuples[real_index])
+                if key not in add_columnes_dict:
+                    add_columnes_dict[key] = 1
+                else:
+                    add_columnes_dict[key] += 1
+    
+            add_columnes_list=[]
+            if sort == 0:
+                add_columnes_list = sorted(add_columnes_dict.keys())
+            if sort == 1:
+                add_columnes_dict_list = add_columnes_dict.items()
+    
+                def recmp(x, y): 
+                    if x[1] > y[1]:
+                        return 1
+                    if x[1] < y[1]:
+                        return -1
+                    if x[0] > y[0]:
+                        return 1
+                    else:
+                        return -1
+    
+                add_columnes_dict_list.sort(lambda x,y:recmp(x,y))
+                for item in add_columnes_dict_list:
+                    add_columnes_list.append(item[0])
+            loop_count = 0
+            for add_colume in add_columnes_list:
+                loop_count += 1
+                if loop_count >count:
+                    break
+                #######加上个数限制
+                name = add_colume
+                values = []
+                for item in user_proper_data:
+                    tuples = item.split(',')
+                    if tuples[real_index] == '':
+                        tuple_value = 'Flag_'+name_list[real_index]+'_'+str(defval_list[real_index])
+                    else:
+                        tuple_value = 'Flag_'+name_list[real_index]+'_'+str(tuples[real_index])
+                    values.append(tuple_value == name)
+                column_obj = Column(name, values)
+                result.add_column(column_obj)
+
+        
+        return result
